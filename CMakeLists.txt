@@ -3,7 +3,7 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/stm32-cmake/cmake/stm32_gcc
 include(tools/fetch_svd.cmake)
 
 # Select MCU model:
-set(MCU STM32F401CC)
+set(MCU STM32F103C6T6A)
 
 # Set project name to match directory name. If set othervise tasks.json and launch.json should be updated
 get_filename_component(BASE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -26,8 +26,17 @@ find_package(CMSIS COMPONENTS  ${MCU} REQUIRED)
 find_package(HAL COMPONENTS STM32${MCU_FAMILY} REQUIRED)
 
 
-add_executable(${PROJECT_NAME} main.cpp)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(${PROJECT_NAME}
+Core/Src/main.c
+Core/Src/stm32f1xx_it.c
+Core/Src/stm32f1xx_hal_msp.c
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+${CMAKE_CURRENT_SOURCE_DIR}
+${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
+${CMAKE_CURRENT_SOURCE_DIR}/Core/Src
+)
 
 # Link required libraries
 target_link_libraries(${PROJECT_NAME}
@@ -43,3 +52,5 @@ set(CMAKE_CXX_STANDARD 20)
 stm32_print_size_of_target(${PROJECT_NAME})
 stm32_generate_elf_bin(${PROJECT_NAME})
 stm32_generate_elf_hex(${PROJECT_NAME})
+
+target_compile_options(${PROJECT_NAME} PUBLIC -Os -fno-exceptions -fno-rtti)
